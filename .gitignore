@@ -1,0 +1,11 @@
+.env
+__pycache__
+*.pyc
+*.pyo
+.git
+main
+Project.code-workspace
+try.py
+try.html
+commands.txt
+uploads

@@ -1,0 +1,15 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+COPY prevention.py .
+COPY requirements.txt .
+COPY .env .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+EXPOSE 80
+
+ENV TEXT_INPUT=TEXT_INPUT
+
+CMD ["python", "prevention.py"]

@@ -1,0 +1,8 @@
+flask
+requests
+markdown
+torch
+transformers
+python-dotenv
+torch
+groq

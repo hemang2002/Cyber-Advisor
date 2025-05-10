@@ -1,0 +1,76 @@
+@import url('https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.gradient-bg {
+    background: linear-gradient(135deg, #2A3B4C 0%, #4ECDC4 100%);
+}
+body {
+    background-image:  url('../Image/background_index.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+.bg-gray-900 {
+    background-color: rgba(17, 24, 39, 0.85);
+    backdrop-filter: blur(8px);
+}
+.bg-gray-800 {
+    background-color: rgba(31, 41, 55, 0.85);
+    backdrop-filter: blur(4px);
+}
+.service-card {
+    transition: all 0.3s ease;
+}
+.service-card:hover {
+    transform: translateY(-5px);
+}
+.floating {
+    animation: floating 3s ease-in-out infinite;
+}
+@keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.typing-indicator span {
+    width: 4px;
+    height: 4px;
+    background: #4ECDC4;
+    border-radius: 50%;
+    animation: typing 1s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.5); }
+}
+.file-drop-zone {
+    border: 2px dashed #4ECDC4;
+    transition: all 0.3s ease;
+}
+.file-drop-zone.drag-over {
+    border-color: #FF6B6B;
+    background: rgba(255, 107, 107, 0.1);
+}
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border-left-color: #4ECDC4;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

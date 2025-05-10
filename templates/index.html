@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Security Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2A3B4C',
+                        secondary: '#4ECDC4'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles_index.css') }}">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <nav class="fixed w-full bg-gray-900/80 backdrop-blur-sm z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="#" onclick="showSection('home')" class="flex items-center gap-2">
+                    <div class="w-10 h-10 flex items-center justify-center bg-secondary/20 rounded-full">
+                        <i class="ri-shield-keyhole-line ri-2x text-secondary"></i>
+                    </div>
+                    <h1 class="text-3xl font-['Pacifico'] text-secondary">CyberGuard</h1>
+                </a>
+                <div class="flex items-center space-x-8">
+                    <a href="#" class="nav-link hover:text-secondary transition-colors cursor-pointer" data-section="home">Home</a>
+                    <a href="#" class="nav-link hover:text-secondary transition-colors cursor-pointer" data-section="services">Services</a>
+                    <a href="#" class="nav-link hover:text-secondary transition-colors cursor-pointer" data-section="about">About</a>
+                    <button onclick="showInputSection()" class="bg-secondary hover:bg-secondary/80 text-gray-900 px-6 py-2 rounded-button">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <section id="home" class="pt-32 pb-20 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-5xl font-bold mb-6">Advanced AI Security Suite</h2>
+                    <p class="text-xl text-gray-400 mb-12">Protect yourself from digital threats with our cutting-edge AI-powered security tools</p>
+                    <p class="text-lg text-gray-300 mb-8">Our AI-powered security suite provides comprehensive protection against modern digital threats. Using advanced machine learning algorithms, we detect and prevent various types of cyber attacks, malware, phishing attempts and data breaches. Stay one step ahead of cybercriminals with real-time advisor.</p>
+                    <button onclick="showInputSection()" class="bg-secondary hover:bg-secondary/80 text-gray-900 px-8 py-3 !rounded-button text-lg font-bold">Try It Now</button>
+                </div>
+            </div>
+        </section>
+        <section id="services" class="hidden py-20 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="text-center max-w-3xl mx-auto mb-16">
+                    <h2 class="text-4xl font-bold mb-6">Our Services</h2>
+                    <p class="text-xl text-gray-400">Comprehensive security solutions for your digital assets</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('fake-news')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-newspaper-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Fake News Detection</h3>
+                        <p class="text-gray-400">Identify and analyze potential misinformation using advanced natural language processing.</p>
+                    </div>
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('malware')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-bug-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Malware Analysis</h3>
+                        <p class="text-gray-400">Deep scan files and executables for malicious code and behavior patterns.</p>
+                    </div>
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('deepFake')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-shield-star-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Fake Images</h3>
+                        <p class="text-gray-400">Analyze image integrity to flag potentially manipulated or AI-generated content..</p>
+                    </div>
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('url')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-global-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">URL Reputation</h3>
+                        <p class="text-gray-400">Check website safety and identify phishing attempts in real-time.</p>
+                    </div>
+                    <!-- <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('ip')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-radar-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">IP Reputation</h3>
+                        <p class="text-gray-400">Track and analyze IP addresses for malicious activity and threats.</p>
+                    </div> -->
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('breach')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-file-damage-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Data Breach Monitor</h3>
+                        <p class="text-gray-400">Monitor data leaks across the web.</p>
+                    </div>
+                    <div class="service-card bg-gray-800 p-8 rounded-lg shadow-lg cursor-pointer" onclick="selectService('Senti-analysis')">
+                        <div class="w-16 h-16 flex items-center justify-center bg-secondary/20 rounded-full mb-6">
+                            <i class="ri-file-damage-line ri-2x text-secondary"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-4">Sentimantal Analysis</h3>
+                        <p class="text-gray-400">Analyze text to determine the emotional tone and sentiment expressed.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="hidden py-20 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto text-center">
+                    <h2 class="text-4xl font-bold mb-8">About Our Platform</h2>
+                    <p class="text-lg text-gray-300 mb-8">We are dedicated to providing state-of-the-art security solutions powered by artificial intelligence. Our platform combines advanced artificial intelligence algorithms with real-time threat detection to keep your digital assets safe from evolving cyber threats.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        <div class="service-card bg-gray-900 p-6 rounded-lg">
+                            <div class="w-12 h-12 flex items-center justify-center bg-secondary/20 rounded-full mx-auto mb-4">
+                                <i class="ri-shield-check-line ri-2x text-secondary"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">Trusted Security</h3>
+                            <p class="text-gray-400">Goal is to protect over 1 million users worldwide</p>
+                        </div>
+                        <div class="service-card bg-gray-900 p-6 rounded-lg">
+                            <div class="w-12 h-12 flex items-center justify-center bg-secondary/20 rounded-full mx-auto mb-4">
+                                <i class="ri-24-hours-line ri-2x text-secondary"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">24/7 Protection</h3>
+                            <p class="text-gray-400">Continuous monitoring and instant alerts</p>
+                        </div>
+                        <div class="service-card bg-gray-900 p-6 rounded-lg">
+                            <div class="w-12 h-12 flex items-center justify-center bg-secondary/20 rounded-full mx-auto mb-4">
+                                <i class="ri-ai-generate ri-2x text-secondary"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">AI-Powered</h3>
+                            <p class="text-gray-400">Advanced machine learning algorithms</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="input-section" class="hidden py-20 relative overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="max-w-3xl mx-auto">
+                    <div id="input-form" class="bg-gray-900 rounded-lg p-8 shadow-xl">
+                        <div class="flex gap-4 mb-6">
+                            <button onclick="switchTab('file')" class="flex-1 py-2 !rounded-button text-center transition-colors" id="fileTab">File Analysis</button>
+                            <button onclick="switchTab('url')" class="flex-1 py-2 !rounded-button text-center transition-colors" id="urlTab">URL Check</button>
+                            <!-- <button onclick="switchTab('ip')" class="flex-1 py-2 !rounded-button text-center transition-colors" id="ipTab">IP Lookup</button> -->
+                            <button onclick="switchTab('text')" class="flex-1 py-2 !rounded-button text-center transition-colors" id="textTab">Text Analysis</button>
+                            <button onclick="switchTab('breach')" class="flex-1 py-2 !rounded-button text-center transition-colors" id="breachTab">Breach</button>
+                        </div>
+                        <div id="fileInput" class="input-section">
+                            <div class="file-drop-zone p-8 rounded-lg text-center mb-6 cursor-pointer" id="dropZone">
+                                <i class="ri-upload-cloud-line ri-3x text-secondary mb-4"></i>
+                                <p class="text-lg mb-2">Drag and drop your files here</p>
+                                <p class="text-sm text-gray-400">or</p>
+                                <button class="mt-4 bg-secondary hover:bg-secondary/80 text-gray-900 px-6 py-2 !rounded-button">Browse Files</button>
+                                <input type="file" id="fileInputField" class="hidden" multiple>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Analysis Type</h4>
+                                    <select class="w-full bg-gray-700 border-none rounded !rounded-button p-2 text-gray-100" id="FileType">
+                                        <option>Malware</option>
+                                        <option>Deep Fake</option>
+                                    </select>
+                                </div>
+                                <div id="uploadedFileInfo" class="mt-4">
+                                    <p id="uploadedFileName" class="text-lg font-bold"></p>
+                                    <button id="removeFileBtn" class="mt-2 text-red-500 hover:text-red-700 cursor-pointer">Remove File</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="urlInput" class="input-section hidden">
+                            <div class="mb-6">
+                                <input type="url" id="urlField" class="w-full bg-gray-800 border-none rounded-lg p-4 text-gray-100 focus:ring-2 focus:ring-secondary" placeholder="Enter URL to analyze...">
+                            </div>
+                            <!-- <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Analysis Type</h4>
+                                    <select class="w-full bg-gray-700 border-none rounded !rounded-button p-2 text-gray-100" id="phishingCheck">
+                                        <option>Phishing</option>
+                                        <option>Malware</option>
+                                    </select>
+                                </div>
+                            </div> -->
+                        </div>
+                        <!-- <div id="ipInput" class="input-section hidden">
+                            <div class="mb-6">
+                                <input type="text" id="ipField" class="w-full bg-gray-800 border-none rounded-lg p-4 text-gray-100 focus:ring-2 focus:ring-secondary" placeholder="Enter IP address...">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Analysis Type</h4>
+                                    <select class="w-full bg-gray-700 border-none rounded !rounded-button p-2 text-gray-100" id="ipAnalysisType">
+                                        <option>Reputation Check</option>
+                                        <option>Threat Intel</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div> -->
+                        <div id="textInput" class="input-section hidden">
+                            <div class="mb-6">
+                                <textarea
+                                id="textField"
+                                class="w-full bg-gray-800 border-none rounded-lg p-4 text-gray-100 focus:ring-2 focus:ring-secondary"
+                                rows="4"
+                                placeholder="Enter text for analysis..."
+                                oninput="updateCharCount()"
+                                maxlength="1000"></textarea>
+                                <div class="flex justify-end mt-2">
+                                    <span id="charCount" class="text-sm text-gray-400">0/1000 characters</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Analysis Type</h4>
+                                    <select class="w-full bg-gray-700 border-none rounded !rounded-button p-2 text-gray-100" id="textAnalysisType">
+                                        <option>Sentiment Analysis</option>
+                                        <option>Fake News Detection</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="breachInput" class="input-section hidden">
+                            <div class="mb-6">
+                                <input
+                                id="breachField"
+                                class="w-full bg-gray-800 border-none rounded-lg p-4 text-gray-100 focus:ring-2 focus:ring-secondary"
+                                rows="4"
+                                placeholder="Enter email for breach analysis..."
+                                oninput="updateBreachCharCount()"
+                                maxlength="50"></input>
+                                <div class="flex justify-end mt-2">
+                                    <span id="breachCharCount" class="text-sm text-gray-400">0/50 characters</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="analyze-btn" class="w-full bg-secondary hover:bg-secondary/80 text-gray-900 py-3 !rounded-button font-bold">
+                            Analyze Content
+                        </button>
+                        <div id="loading-spinner" class="hidden mt-4 flex justify-center">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        const elements = {
+            dropZone: document.getElementById('dropZone'),
+            fileInput: document.getElementById('fileInputField'),
+            analyzeBtn: document.getElementById('analyze-btn'),
+            inputSection: document.getElementById('input-section'),
+            textField: document.getElementById('textField'),
+            charCount: document.getElementById('charCount'),
+            breachField: document.getElementById('breachField'),
+            breachCharCount: document.getElementById('breachCharCount'),
+            removeFileBtn: document.getElementById('removeFileBtn'),
+            uploadedFileName: document.getElementById('uploadedFileName'),
+            uploadedFileInfo: document.getElementById('uploadedFileInfo'),
+            loadingSpinner: document.getElementById('loading-spinner')
+        };
+    
+        function switchTab(tab) {
+            document.querySelectorAll('.input-section').forEach(section => section.classList.add('hidden'));
+            document.getElementById(`${tab}Input`).classList.remove('hidden');
+            document.querySelectorAll('#fileTab, #urlTab, #ipTab, #textTab, #breachTab').forEach(btn => {
+                btn.classList.remove('bg-secondary', 'text-gray-900');
+                btn.classList.add('bg-gray-800', 'text-gray-400');
+            });
+            document.getElementById(`${tab}Tab`).classList.remove('bg-gray-800', 'text-gray-400');
+            document.getElementById(`${tab}Tab`).classList.add('bg-secondary', 'text-gray-900');
+        }
+    
+        function setDefaultSelectOption(selectId, value) {
+            const select = document.getElementById(selectId);
+            if (select) select.value = value;
+        }
+    
+        function showSection(sectionId) {
+            document.querySelectorAll('main > section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('text-secondary');
+                    if (link.dataset.section === sectionId) {
+                        link.classList.add('text-secondary');
+                    }
+                });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    
+        function showInputSection() {
+            elements.inputSection.classList.remove('hidden');
+            elements.inputSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    
+        function selectService(service) {
+            showInputSection();
+            switch (service) {
+                case 'malware':
+                    switchTab('file');
+                    setDefaultSelectOption('FileType', 'Malware');
+                    break;
+                case 'deepFake':
+                    switchTab('file');
+                    setDefaultSelectOption('FileType', 'Deep Fake');
+                    break;
+                case 'url':
+                    switchTab('url');
+                    break;
+                // case 'ip':
+                //     switchTab('ip');
+                //     break;
+                case 'sentiment':
+                    switchTab('text');
+                    setDefaultSelectOption('textAnalysisType', 'Sentiment Analysis');
+                    break;
+                case 'fake-news':
+                    switchTab('text');
+                    setDefaultSelectOption('textAnalysisType', 'Fake News Detection');
+                    break;
+                case 'breach':
+                    switchTab('breach');
+                    break;
+            }
+        }
+    
+        function updateCharCount() {
+            elements.charCount.textContent = `${elements.textField.value.length}/1000 characters`;
+        }
+    
+        function updateBreachCharCount() {
+            elements.breachCharCount.textContent = `${elements.breachField.value.length}/50 characters`;
+        }
+    
+        function isValidURL(url) {
+            return /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- .\/?%&=]*)?$/.test(url);
+        }
+    
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+    
+        // function isValidIP(ip) {
+        //     const pattern = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        //     return pattern.test(ip);
+        // }
+    
+        async function handleFiles(files) {
+            if (!files.length) return;
+            const formData = new FormData();
+            formData.append('files', files[0]);
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData });
+                const result = await response.json();
+                if (result.alert) {
+                    alert(result.alert);
+                    return;
+                }
+                elements.uploadedFileName.textContent = result.filename;
+                elements.uploadedFileInfo.classList.remove('hidden');
+            } catch (error) {
+                alert('Failed to upload file.');
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            showSection('home');
+            switchTab('file');
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', e => {
+                    e.preventDefault();
+                    showSection(link.dataset.section);
+                });
+            });
+    
+            // Add event listeners for Enter key press
+            document.getElementById('urlField').addEventListener('keydown', handleEnterKey);
+            // document.getElementById('ipField').addEventListener('keydown', handleEnterKey);
+            document.getElementById('textField').addEventListener('keydown', handleEnterKey);
+            document.getElementById('breachField').addEventListener('keydown', handleEnterKey);
+        });
+    
+        elements.dropZone.addEventListener('dragover', e => {
+            e.preventDefault();
+            elements.dropZone.classList.add('drag-over');
+        });
+    
+        elements.dropZone.addEventListener('dragleave', () => {
+            elements.dropZone.classList.remove('drag-over');
+        });
+    
+        elements.dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            elements.dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+    
+        elements.dropZone.addEventListener('click', () => elements.fileInput.click());
+ 
+        elements.fileInput.addEventListener('change', e => handleFiles(e.target.files));
+    
+        elements.removeFileBtn.addEventListener('click', () => {
+            elements.fileInput.value = '';
+            elements.uploadedFileInfo.classList.add('hidden');
+            elements.uploadedFileName.textContent = '';
+        });
+    
+        async function analyzebtnFun() {
+            elements.loadingSpinner.classList.remove('hidden');
+            elements.analyzeBtn.disabled = true;
+            const activeTab = document.querySelector('.input-section:not(.hidden)').id;
+            let feature, inputData, subcategories;
+    
+            try {
+                switch (activeTab) {
+                    case 'fileInput':
+                        feature = 'File Analysis';
+                        inputData = elements.uploadedFileName.textContent;
+                        subcategories = document.getElementById('FileType').value;
+                        if (!inputData) throw new Error('Please upload a file.');
+                        break;
+                    case 'urlInput':
+                        feature = 'URL Check';
+                        inputData = document.getElementById('urlField').value;
+                        // subcategories = document.getElementById('phishingCheck').value;
+                        if (!isValidURL(inputData)) throw new Error('Please enter a valid URL.');
+                        break;
+                    // case 'ipInput':
+                    //     feature = 'IP Lookup';
+                    //     inputData = document.getElementById('ipField').value;
+                    //     subcategories = document.getElementById('ipField').value;
+                    //     if (!isValidIP(inputData)) throw new Error('Please enter a valid IP address.');
+                    //     break;
+                    case 'textInput':
+                        feature = 'Text Analysis';
+                        inputData = elements.textField.value;
+                        subcategories = document.getElementById('textAnalysisType').value;
+                        if (!inputData.trim()) throw new Error('Please enter text for analysis.');
+                        break;
+                    case 'breachInput':
+                        feature = 'Breach Analysis';
+                        inputData = elements.breachField.value;
+                        if (!inputData.trim()) throw new Error('Please enter an email address.');
+                        if (!isValidEmail(inputData)) throw new Error('Please enter a valid email address.');
+                        break;
+                    default:
+                        throw new Error('Please select an input type.');
+                }
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ feature, inputData, subcategories })
+                });
+                const result = await response.json();
+                if (result.alert) {
+                    alert(result.alert);
+                    return;
+                }
+                if (result.redirect) window.location.href = result.redirect;
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                elements.loadingSpinner.classList.add('hidden');
+                elements.analyzeBtn.disabled = false;
+            }
+        }
+    
+        function handleEnterKey(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                analyzebtnFun();
+            }
+        }
+    
+        elements.analyzeBtn.addEventListener('click', analyzebtnFun);
+    </script>
+</body>
+</html>

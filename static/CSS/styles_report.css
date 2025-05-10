@@ -1,0 +1,54 @@
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+    background-image: url('../Image/background_report.jpg');
+    background-size: cover; 
+    background-position: center; 
+    background-attachment: fixed; 
+    background-repeat: no-repeat;
+}
+.chat-container {
+    display: none;
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 700px;
+    height: 500px;
+    background: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+.chat-messages {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    padding: 16px;
+}
+.message {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+.user-message {
+    background: #2563eb;
+    margin-left: auto;
+    color: white;
+}
+.assistant-message {
+    background: #374151;
+    margin-right: auto;
+    color: white;
+}
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #ffffff;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

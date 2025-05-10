@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report & Prevention</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#4f46e5'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/styles_report.css') }}">
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                    <i class="ri-shield-keyhole-line text-2xl"></i>
+                </div>
+                <div>
+                    <a class="flex items-center gap-2">
+                        <h1 class="text-3xl font-['Pacifico'] text-secondary">CyberGuard</h1>
+                    </a>
+                    <h2 class="text-xl font-bold">Security Dashboard</h2>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="bg-gray-800 px-4 py-2 rounded-lg flex items-center">
+                    <i class="ri-time-line mr-2"></i>
+                    <span id="currentTime">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-gray-800/90 backdrop-blur-sm rounded-lg p-6 mb-8 shadow-lg border border-gray-700">
+                <h1 class="text-2xl font-bold mb-6">Security Incident Report</h1>
+                <div id="reportDetails" class="space-y-4 mb-6">
+                    <p>Loading analysis data...</p>
+                </div>
+                <div class="bg-gray-700/80 backdrop-blur-sm rounded p-4 mb-6">
+                    <div class="flex items-center justify-center">
+                        <div id="severityIndicator" class="w-32 h-32 bg-gray-800 rounded-full flex items-center justify-center relative">
+                            <div class="absolute inset-0 rounded-full border-4 animate-pulse border-gray-500"></div>
+                            <span class="text-3xl font-bold text-gray-500">N/A</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4">
+                    <button id="preventionBtn" class="bg-primary hover:bg-blue-700 text-white px-6 py-2 rounded-button flex items-center" disabled>
+                        <i class="ri-shield-line mr-2"></i>
+                        View Prevention Steps
+                    </button>
+                </div>
+            </div>
+            <div id="preventionSteps" class="hidden bg-gray-800/90 backdrop-blur-sm rounded-lg p-6 mb-8 shadow-lg border border-gray-700">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold mb-2">Recommended Prevention Steps</h2>
+                    </div>
+                </div>
+                <div id="preventionText" class="text-gray-300 mb-6"></div>
+                <button id="askAssistantBtn" class="bg-secondary hover:bg-indigo-600 text-white px-6 py-2 rounded-button flex items-center">
+                    <i class="ri-customer-service-line mr-2"></i>
+                    Ask Our Assistant
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="chatContainer" class="chat-container">
+        <div class="bg-gray-800 p-3 rounded-t-lg flex justify-between items-center">
+            <h3 class="text-white">Security Assistant</h3>
+            <button id="closeChat" class="text-gray-400 hover:text-white">
+                <i class="ri-close-line"></i>
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="bg-gray-800 p-3 rounded-b-lg">
+            <div class="flex space-x-2">
+                <input type="text" id="messageInput" class="flex-1 bg-gray-700 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type your question...">
+                <!-- <button id="recordVoice" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-button">
+                    <i class="ri-mic-line"></i>
+                </button> -->
+                <button id="sendMessage" class="bg-primary hover:bg-blue-700 text-white px-4 py-2 rounded-button">
+                    <i class="ri-send-plane-line"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <button id="chatbotBtn" class="fixed bottom-4 right-4 bg-secondary hover:bg-indigo-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center">
+        <i class="ri-customer-service-line mr-2"></i>
+        Advisor
+    </button>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    
+        function formatKeyAsLabel(key) {
+            return key
+                .replace(/([A-Z])/g, ' $1')
+                .replace(/_/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+        }
+    
+        function createReportDetails(analysisResult) {
+            const container = document.getElementById('reportDetails');
+            container.innerHTML = '';
+            const gridDiv = document.createElement('div');
+            gridDiv.className = 'grid grid-cols-2 gap-4';
+    
+            const details = Object.keys(analysisResult)
+                .filter(key => !['summary'].includes(key))
+                .map(key => ({
+                    label: formatKeyAsLabel(key),
+                    value: analysisResult[key] ?? 'N/A'
+                }));
+    
+            details.forEach(detail => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <h3 class="text-gray-400 mb-1">${detail.label}</h3>
+                    <p>${detail.value}</p>
+                `;
+                gridDiv.appendChild(div);
+            });
+            container.appendChild(gridDiv);
+    
+            if (analysisResult.summary) {
+                const descDiv = document.createElement('div');
+                descDiv.innerHTML = `
+                    <h3 class="text-gray-400 mb-2">Description</h3>
+                    <p class="text-gray-300">${analysisResult.summary}</p>
+                `;
+                container.appendChild(descDiv);
+            }
+        }
+
+        function updateSeverityIndicator(severity) {
+            const indicator = document.getElementById('severityIndicator');
+            const border = indicator.querySelector('.animate-pulse');
+            const text = indicator.querySelector('span');
+            let color = '';
+            switch (severity.toLowerCase()) {
+                case 'high':
+                    color = 'red-500';
+                    break;
+                case 'medium':
+                    color = 'yellow-500';
+                    break;
+                case 'low':
+                    color = 'green-500';
+                    break;
+                default:
+                    color = 'gray-500';
+            }
+            border.className = `absolute inset-0 rounded-full border-4 border-${color} animate-pulse`;
+            text.className = `text-3xl font-bold text-${color}`;
+            text.textContent = severity || 'N/A';
+        }
+    
+        let analysisResult = {};
+        let preventionStepsText = "";
+        // let mediaRecorder;
+        // let isRecording = false;
+        // let audioChunks = [];
+        // let transcriptionInterval;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/get_analysis_result')
+                .then(response => response.json())
+                .then(data => {
+                    if (data && Object.keys(data).length > 0) {
+                        analysisResult = data;
+                        createReportDetails(analysisResult);
+                        updateSeverityIndicator(analysisResult.severity || 'Low');
+                        if (analysisResult.prevention_required.toLowerCase() === 'yes') {
+                            document.getElementById('preventionBtn').disabled = false;
+                        } else {
+                            document.getElementById('preventionBtn').disabled = true;
+                        }
+                    } else {
+                        document.getElementById('reportDetails').innerHTML = '<p>No analysis data available.</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching analysis result:', error);
+                    document.getElementById('reportDetails').innerHTML = '<p>Error loading analysis data.</p>';
+                });
+        });
+        
+        const preventionBtn = document.getElementById('preventionBtn');
+        const preventionSteps = document.getElementById('preventionSteps');
+        const preventionText = document.getElementById('preventionText');
+        
+        preventionBtn.addEventListener('click', async () => {
+            const spinner = document.createElement('div');
+            spinner.className = 'spinner';
+            preventionBtn.disabled = true;
+            preventionBtn.innerHTML = '';
+            preventionBtn.appendChild(spinner);
+            try {
+                const response = await fetch('/process_prevention', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reportDetails: analysisResult.summary })
+                });
+                const result = await response.json();
+                preventionText.innerHTML = marked.parse(result.preventionSteps);
+                preventionStepsText = result.preventionSteps;
+                preventionSteps.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error processing prevention steps:', error);
+                alert('An error occurred while processing prevention steps. Please try again later.');
+            } finally {
+                preventionBtn.disabled = analysisResult.prevention_required?.toLowerCase() !== 'yes';
+                preventionBtn.innerHTML = `
+                    <i class="ri-shield-line mr-2"></i>
+                    View Prevention Steps
+                `;
+            }
+        });
+
+        const askAssistantBtn = document.getElementById('askAssistantBtn');
+        const chatContainer = document.getElementById('chatContainer');
+        const closeChat = document.getElementById('closeChat');
+        const messageInput = document.getElementById('messageInput');
+        const sendMessage = document.getElementById('sendMessage');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatbotBtn = document.getElementById('chatbotBtn');
+        // const recordVoiceBtn = document.getElementById('recordVoice');
+    
+        function addLoadingIndicator() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loadingIndicator';
+            loadingDiv.classList.add('message', 'assistant-message');
+            loadingDiv.innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="text-gray-300">Analyzing</span>
+                    <div class="flex space-x-1">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                        <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return loadingDiv;
+        }
+    
+        function removeLoadingIndicator() {
+            const loadingDiv = document.getElementById('loadingIndicator');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+    
+        async function sendChatbotRequest(userMessage) {
+            if (userMessage) {
+                addMessage(userMessage, 'user');
+                messageInput.value = '';
+                const loadingIndicator = addLoadingIndicator();
+                try {
+                    const response = await fetch('/chatbot', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            inputText: userMessage,
+                            reportDetails: analysisResult.summary,
+                            preventionSteps: preventionStepsText
+                        })
+                    });
+                    const result = await response.json();
+                    removeLoadingIndicator();
+                    if (result.alert) {
+                        addMessage(result.alert, 'assistant');
+                    } else {
+                        addMessage(result.response, 'assistant');
+                    }
+                } catch (error) {
+                    console.error('Error communicating with chatbot:', error);
+                    removeLoadingIndicator();
+                    addMessage('Sorry, I encountered an error. Please try again later.', 'assistant');
+                }
+            }
+        }
+    
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', `${type}-message`);
+            if (type === 'assistant') {
+                messageDiv.innerHTML = marked.parse(text);
+                // const speakButton = `<button class="speak-btn bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded ml-2" onclick="speakText(this, '${encodeURIComponent(text)}')"><i class="ri-volume-up-line"></i></button>`;
+                messageDiv.innerHTML = marked.parse(text) //+ speakButton;
+            } else {
+                messageDiv.textContent = text;
+            }
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    
+        // async function speakText(button, encodedText) {
+        //     const text = decodeURIComponent(encodedText);
+        //     try {
+        //         const response = await fetch('/text_to_speech', {
+        //             method: 'POST',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             },
+        //             body: JSON.stringify({ text })
+        //         });
+        //         const audioBlob = await response.blob();
+        //         const audioUrl = URL.createObjectURL(audioBlob);
+        //         const audio = new Audio(audioUrl);
+        //         audio.play();
+        //     } catch (error) {
+        //         console.error('Error in text-to-speech:', error);
+        //         alert('Failed to generate speech.');
+        //     }
+        // }
+
+        // async function transcribeAudioChunk() {
+        //     if (audioChunks.length === 0) return;
+
+        //     const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        //     const formData = new FormData();
+        //     formData.append('audio', blob, 'chunk.webm');
+
+        //     try {
+        //         const response = await fetch('/voice_to_text', {
+        //             method: 'POST',
+        //             body: formData
+        //         });
+        //         const result = await response.json();
+        //         if (result.text) {
+        //             messageInput.value = result.text;
+        //         //     messageInput.value = (messageInput.value + ' ' + result.text).trim();
+        //         }
+        //     } catch (error) {
+        //         console.error('Error in voice-to-text:', error);
+        //     }
+
+        //     audioChunks = []; // Clear chunks after processing
+        // }
+        
+        // recordVoiceBtn.addEventListener('click', async () => {
+        //     if (!isRecording) {
+        //         try {
+        //             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        //             mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        //             audioChunks = [];
+
+        //             mediaRecorder.ondataavailable = (e) => {
+        //                 if (e.data.size > 0) {
+        //                     audioChunks.push(e.data);
+        //                 }
+        //             };
+
+        //             mediaRecorder.onstop = async () => {
+        //                 clearInterval(transcriptionInterval);
+        //                 if (audioChunks.length > 0) {
+        //                     await transcribeAudioChunk();
+        //                     if (messageInput.value) {
+        //                         sendChatbotRequest(messageInput.value);
+        //                     }
+        //                 }
+        //                 stream.getTracks().forEach(track => track.stop());
+        //             };
+
+        //             mediaRecorder.start();
+        //             isRecording = true;
+        //             recordVoiceBtn.classList.remove('bg-purple-600');
+        //             recordVoiceBtn.classList.add('bg-red-600');
+        //             recordVoiceBtn.innerHTML = '<i class="ri-mic-off-line"></i>';
+
+        //             // Set up periodic transcription every 3 seconds
+        //             transcriptionInterval = setInterval(async () => {
+        //                 if (audioChunks.length > 0) {
+        //                     await transcribeAudioChunk();
+        //                 }
+        //             }, 3000);
+        //         } catch (error) {
+        //             console.error('Error accessing microphone:', error);
+        //             alert('Failed to access microphone.');
+        //         }
+        //     } else {
+        //         mediaRecorder.stop();
+        //         isRecording = false;
+        //         clearInterval(transcriptionInterval);
+        //         recordVoiceBtn.classList.remove('bg-red-600');
+        //         recordVoiceBtn.classList.add('bg-purple-600');
+        //         recordVoiceBtn.innerHTML = '<i class="ri-mic-line"></i>';
+        //     }
+        // });
+
+        askAssistantBtn.addEventListener('click', () => {
+            chatContainer.style.display = 'block';
+        });
+    
+        chatbotBtn.addEventListener('click', () => {
+            chatContainer.style.display = 'block';
+        });
+    
+        closeChat.addEventListener('click', () => {
+            chatContainer.style.display = 'none';
+        });
+    
+        sendMessage.addEventListener('click', () => {
+            const userMessage = messageInput.value.trim();
+            sendChatbotRequest(userMessage);
+        });
+    
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const userMessage = messageInput.value.trim();
+                sendChatbotRequest(userMessage);
+            }
+        });
+    </script>
+</body>
+</html>
