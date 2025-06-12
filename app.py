@@ -8,20 +8,28 @@ import json
 import time
 import config
 import markdown
-from groq import Groq
-import io
+from flask_session import Session
 import re
 import subprocess
 from datetime import datetime
 from src import deepFake, prevention
+import ast
+from src.redis_client import RedisClient
 
-app = Flask(__name__)
-app.secret_key = "hello"#config.SECREAT_KEY
 
 UPLOAD_FOLDER = config.UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+app = Flask(__name__)
+app.config['SESSION_TYPE'] = 'redis'
+app.config['SESSION_REDIS'] = config.REDIS_CLIENT
+app.config['SESSION_PERMANENT'] = False
+app.config['SESSION_USE_SIGNER'] = True
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.secret_key = config.SECRET_KEY
+
+redis_client = RedisClient()
+Session(app)
 ALLOWED_IMAGE_EXTENSIONS = {'.png', '.jpeg', '.jpg'}
 RESTRICTED_FILE_EXTENSIONS = {'.exe', '.msi', '.bat', '.jar', '.py'}
 
@@ -66,9 +74,21 @@ def analyze_data():
         feature = data.get('feature')
         input_data = data.get('inputData')
         subcategories = data.get('subcategories')
-        
+        user_id = request.remote_addr
         if not feature or not input_data:
             return show_alert("Missing feature or input data.")
+        session['cache_info'] = {
+            'feature': feature,
+            'inputData': input_data,
+        }
+        cache_key = f"analysis:{user_id}:{feature}:{input_data}"
+        cached_result = redis_client.get_cached_result(cache_key)
+        cached_result = json.dumps(ast.literal_eval(cached_result), indent = 2) if cached_result else None
+        if cached_result:
+            print(cached_result)
+            print(type(json.loads(cached_result)))
+            session['analysis_result'] = json.loads(cached_result)
+            return jsonify({"redirect": "/report"})
 
         info = {
             'detection_time': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'),
@@ -88,11 +108,11 @@ def analyze_data():
                 if not validate_file_extension(input_data, ALLOWED_IMAGE_EXTENSIONS):
                     return show_alert("Only image files (.png, .jpeg, .jpg) are allowed for deepfake analysis.")
                 result = deepFake.deepfake_analysis(file_path)
-                result = json.loads(result)
+                print(result)
                 if result['Label'].lower() == "fake":
                     result['severity'] = "medium" 
                 else:
-                    result['severity'] = "LOW" 
+                    result['severity'] = "LOW"
                 result['prevention_required'] = "No"
             elif subcategories == 'Malware':
                 result = getSummary(get_malware(file_path))
@@ -136,7 +156,10 @@ def analyze_data():
         else:
             return show_alert("Unknown feature selected.")
 
-        session['analysis_result'] = info | result
+        analysis_result = info | result
+        session['analysis_result'] = analysis_result
+        print(str(analysis_result))
+        redis_client.cache_result(cache_key, str(analysis_result))
         return jsonify({"redirect": "/report"})
 
     except Exception as e:
@@ -313,72 +336,11 @@ def run_agent(TEXT_INPUT, SELECT):
 
 @app.route('/get_prevention_steps')
 def get_prevention_steps():
-    get_prevention_steps = session.get('prevention_steps', [])
+    # get_prevention_steps = session.get('prevention_steps', [])
+    if redis_client.get_cached_result('prevention_steps'):
+        get_prevention_steps = redis_client.get_cached_result('prevention_steps')
+        get_prevention_steps = json.loads(get_prevention_steps)
     return jsonify({"preventionSteps": get_prevention_steps})
-
-
-@app.route('/voice_to_text', methods=['POST'])
-def voice_to_text():
-    try:
-        FORMAT = pyaudio.paInt16
-        CHANNELS = 1
-        RATE = 16000
-        CHUNK = 1024
-        RECORD_SECONDS = 5
-
-        client = Groq(api_key=os.getenv("GROK_API_KEY"))
-        if 'audio' not in request.files:
-            return jsonify({"text": "", "error": "No audio file provided"}), 400
-            
-        audio_file = request.files['audio']
-        if audio_file.filename == '':
-            return jsonify({"text": "", "error": "No audio file selected"}), 400
-
-        # Create in-memory file-like object
-        audio_buffer = io.BytesIO()
-        audio_buffer.write(audio_file.read())
-        audio_buffer.seek(0)
-
-        # Transcribe using Groq's Whisper
-        transcription = client.audio.transcriptions.create(
-            file=("audio_chunk.webm", audio_buffer),
-            model="whisper-large-v3",
-            response_format="json"
-        )
-
-        return jsonify({"text": transcription.text})
-            
-    except Exception as e:
-        return show_alert(f"Voice recognition failed: {str(e)}", 500)
-
-
-@app.route('/text_to_speech', methods=['POST'])
-def text_to_speech():
-    try:
-
-        text = session['chatbot_output']
-        if not text:
-            return Response('No text provided', status=400)
-        
-        client = Groq(api_key=os.getenv("GROK_API_KEY")) 
-        response = client.audio.speech.create(
-            model="playai-tts",
-            input=text,
-            # voice="Arista-PlayAI",
-            voice="Atlas-PlayAI",
-            response_format="wav"
-        )
-
-        audio_buffer = io.BytesIO(response.read())
-
-        return Response(
-            audio_buffer,
-            mimetype='audio/wav',
-            headers={'Content-Disposition': 'inline; filename=speech.wav'}
-        )
-        
-    except Exception as e:
-        return Response(f'Error generating speech: {str(e)}', status=500)
 
 
 @app.route('/chatbot', methods=['POST'])
@@ -388,15 +350,35 @@ def chat():
         input_text = data.get('inputText')
         reference_text = data.get('preventionSteps', "")
         # report_details = data.get('reportDetails')
+        user_id = request.remote_addr
         if not input_text:
             return show_alert("No input text provided.")
         output = chatbot(input_text, reference_text)
+        messages = [
+            {"sender": "user", "message": user_message},
+            {"sender": "assistant", "message": assistant_message}
+        ]
+        for msg in messages:
+            redis_client.store_message(user_id, json.dumps(msg))
         session['chatbot_output'] = output
         return jsonify({"response": markdown.markdown(output)})
     except Exception as e:
         return show_alert(f"Chatbot error: {str(e)}", 500)
 
 
+@app.route('/get_conversation_history', methods=['GET'])
+def get_conversation_history():
+    try:
+        user_id = request.remote_addr
+        conversation_history = redis_client.get_message(user_id)
+        if conversation_history is None:
+            return jsonify({"conversation": []})
+        return jsonify({"conversation": [json.loads(conv) for conv in conversation_history]})
+    except Exception as e:
+        print(e)
+        return show_alert(f"Error fetching conversation history: {str(e)}", 500)
+
+        
 def chatbot(input_text, reference_text=""):
     """Interact with chatbot service."""
     try:
@@ -420,37 +402,20 @@ def report():
 @app.route('/get_analysis_result')
 def get_analysis_result():
     analysis_result = session.get('analysis_result', {})
-    # analysis_result = {
-    #     "feature": "Phishing Attack",
-    #     "subcategories": "Email Phishing",
-    #     "severity": "LOW",
-    #     "detection_time": "2023-10-01T12:34:56Z",
-    #     "summary": "A phishing email was detected targeting employees.",
-    #     "prevention_required": "yes"
-    # }
     return jsonify(analysis_result)
-
-
-def findPrevention(TEXT_INPUT):
-    """Run text analysis using Docker agent."""
-    try:
-        command = [
-            "docker", "run", "--rm",
-            "-e", f"TEXT_INPUT={TEXT_INPUT}",
-            "prevent"
-        ]
-        result = subprocess.run(command, capture_output=True, text=True)
-        result = markdown.markdown(re.sub(r'<think>.*?</think>', '', result.stdout, flags=re.DOTALL).strip())
-        return result
-    except subprocess.SubprocessError as e:
-        return {"alert": f"Text analysis failed: {str(e)}"}
 
 
 @app.route('/process_prevention', methods=['POST'])
 def process_prevention():
     data = request.json
+    cache = session.get('cache_info', [])
     input_text = data.get('reportDetails')
-    prevention_steps = prevention.findPrevention(input_text)
+    output = redis_client.get_prevention(request.remote_addr, cache["feature"], cache["inputData"])
+    if output:
+        prevention_steps = output
+    else:
+        prevention_steps = prevention.findPrevention(input_text)
+        redis_client.store_prevention(request.remote_addr, cache["feature"], cache["inputData"], prevention_steps)
     session['prevention_steps'] = prevention_steps
     prevention_steps = markdown.markdown(re.sub(r'<think>.*?</think>', '', prevention_steps, flags=re.DOTALL).strip())
     return jsonify({"preventionSteps": prevention_steps})

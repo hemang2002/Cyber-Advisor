@@ -1,7 +1,6 @@
 # type: ignore
 
 import os
-import json
 from typing import Dict
 from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
@@ -105,10 +104,3 @@ def findPrevention(problem: str) -> Dict:
     explanation = explain_in_simple_terms(str(search_result))
     
     return explanation
-
-# if __name__ == "__main__":
-#     text = """This report summarizes two data breaches: "Gaadi" and "Dailymotion". The breaches occurred in 2015 and 2016, respectively.
-#     The report provides detailed information about the breaches, including the industries affected, the type of data exposed, and the password risk.
-#     The data exposed includes personal identification, security practices, communication and social interactions, demographics, and device and network information.
-#     The report also includes a summary of the breaches, highlighting the importance of password security and the need for users to change their passwords regularly."""
-#     print(findPrevention(text))#os.environ.get('TEXT_INPUT', "TEXT_INPUT"))

@@ -2,6 +2,7 @@
 import os
 from dotenv import load_dotenv
 import random
+import redis
 
 load_dotenv()
 
@@ -26,4 +27,14 @@ DEEPFAKE_MODEL_NAME = os.getenv("MODEL_NAME")
 
 # Other parameters of flask
 TIMEOUT = 30
+SECRET_KEY = str(random.randint(10**13, 10**14 - 1))
+
+# redis
+REDIS_HOST = "localhost"
+REDIS_PORT = 6379
+REDIS_DB = 0
+REDIS_EXPIRE = 450
+REDIS_CLIENT = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+
+# secret key for session
 SECRET_KEY = str(random.randint(10**13, 10**14 - 1))

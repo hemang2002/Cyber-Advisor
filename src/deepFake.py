@@ -5,6 +5,7 @@ import os
 import json
 import warnings
 from dotenv import load_dotenv
+import ast
 
 load_dotenv()
 
@@ -26,7 +27,6 @@ def deepfake_analysis(image_path):
             {"Label": result[1]['label'], "Score": result[0]['score']},
             {"Label": result[0]['label'], "Score": result[1]['score']}
         ]
-        result = json.dumps(result[0])
-        return f"{result}"
+        return result[0]
     except Exception as e:
         return {"error": str(e)}

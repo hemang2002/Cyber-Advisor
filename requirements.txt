@@ -6,3 +6,7 @@ transformers
 python-dotenv
 torch
 groq
+redis
+pillow
+google-search-results
+flask-session
